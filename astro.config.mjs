@@ -7,7 +7,7 @@ import { defineConfig, fontProviders } from 'astro/config';
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://fhaworld.github.io',
-	base: '/boke/',
+	base: '/bokex/',
 	integrations: [mdx(), sitemap()],
 	fonts: [
 		{
