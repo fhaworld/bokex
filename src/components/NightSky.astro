@@ -1,5 +1,32 @@
-<div class="night-sky" aria-hidden="true">
+---
+import { Image } from "astro:assets";
+import MoonlitSky from "../assets/moonlit-sky.png";
+---
+
+<div
+  class="night-sky"
+  data-night-scene
+  transition:persist="night-sky"
+  aria-hidden="true"
+>
+  <Image
+    class="sky-image"
+    src={MoonlitSky}
+    alt=""
+    widths={[900, 1280, 1672]}
+    sizes="100vw"
+    format="webp"
+    quality={88}
+    loading="eager"
+    fetchpriority="high"
+  />
+  <canvas class="sky-atmosphere" data-atmosphere></canvas>
   <div class="star-field"></div>
   <div class="sky-haze haze-one"></div>
   <div class="sky-haze haze-two"></div>
 </div>
+
+<script>
+  import "../scripts/moon-atmosphere";
+  import "../scripts/glass-surfaces";
+</script>

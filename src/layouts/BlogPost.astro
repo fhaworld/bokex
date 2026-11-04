@@ -4,7 +4,9 @@ import type { MarkdownHeading } from "astro";
 import type { CollectionEntry } from "astro:content";
 import SiteLayout from "./SiteLayout.astro";
 import FormattedDate from "../components/FormattedDate.astro";
+import ArticleContinuation from "../components/ArticleContinuation.astro";
 type Props = CollectionEntry<"blog">["data"] & {
+  postId: string;
   headings?: MarkdownHeading[];
   minutes?: number;
 };
@@ -17,6 +19,7 @@ const {
   tags = [],
   headings = [],
   minutes = 1,
+  postId,
 } = Astro.props;
 const toc = headings.filter(
   (heading) => heading.depth === 2 || heading.depth === 3,
@@ -50,23 +53,26 @@ const toc = headings.filter(
     )}
   </header>
   <div class:list={["reading-layout", { "with-toc": toc.length > 0 }]}>
-    <article class="article-body glass prose">
-      {heroImage && (
-        <Image
-          class="article-cover"
-          src={heroImage}
-          width={1120}
-          height={560}
-          alt=""
-        />
-      )}
-      <slot />
-      <div class="article-end">
-        <span>✧</span>
-        <p>写于月下，读于此刻。</p>
-        <a href={`${import.meta.env.BASE_URL}blog/`}>继续翻阅 →</a>
-      </div>
-    </article>
+    <div class="reading-column">
+      <article class="article-body glass prose">
+        {heroImage && (
+          <Image
+            class="article-cover"
+            src={heroImage}
+            width={1120}
+            height={560}
+            alt=""
+          />
+        )}
+        <slot />
+        <div class="article-end">
+          <span>✧</span>
+          <p>写于月下，读于此刻。</p>
+          <a href={`${import.meta.env.BASE_URL}blog/`}>继续翻阅 →</a>
+        </div>
+      </article>
+      <ArticleContinuation postId={postId} />
+    </div>
     {toc.length > 0 && (
       <aside class="article-toc glass">
         <p class="eyebrow">ON THIS PAGE</p>
@@ -86,37 +92,57 @@ const toc = headings.filter(
   </div>
 </SiteLayout>
 <script>
-  document.querySelectorAll<HTMLElement>(".prose pre").forEach((pre) => {
-    const code = pre.querySelector("code");
-    if (!code || !navigator.clipboard) return;
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "copy-code";
-    button.textContent = "复制";
-    button.setAttribute("aria-label", "复制代码");
-    button.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(code.textContent ?? "");
-        button.textContent = "已复制";
-        button.setAttribute("aria-label", "代码已复制");
-      } catch {
-        button.textContent = "复制失败";
-        button.setAttribute("aria-label", "代码复制失败");
-      }
-      setTimeout(() => {
-        button.textContent = "复制";
-        button.setAttribute("aria-label", "复制代码");
-      }, 1800);
+  let articleEvents: AbortController | undefined;
+  function setupArticleTools() {
+    articleEvents?.abort();
+    const progress = document.querySelector<HTMLElement>(".reading-progress");
+    if (!progress) return;
+    articleEvents = new AbortController();
+
+    document.querySelectorAll<HTMLElement>(".prose pre").forEach((pre) => {
+      const code = pre.querySelector("code");
+      if (!code || !navigator.clipboard || pre.querySelector(".copy-code"))
+        return;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "copy-code moon-button";
+      const aura = document.createElement("span");
+      aura.className = "moon-aura";
+      aura.setAttribute("aria-hidden", "true");
+      const label = document.createElement("span");
+      label.textContent = "复制";
+      button.append(aura, label);
+      button.setAttribute("aria-label", "复制代码");
+      button.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(code.textContent ?? "");
+          label.textContent = "已复制";
+          button.setAttribute("aria-label", "代码已复制");
+        } catch {
+          label.textContent = "复制失败";
+          button.setAttribute("aria-label", "代码复制失败");
+        }
+        setTimeout(() => {
+          label.textContent = "复制";
+          button.setAttribute("aria-label", "复制代码");
+        }, 1800);
+      });
+      pre.append(button);
     });
-    pre.append(button);
-  });
-  const progress = document.querySelector<HTMLElement>(".reading-progress");
-  function updateProgress() {
-    const distance = document.documentElement.scrollHeight - innerHeight;
-    if (progress)
-      progress.style.transform = `scaleX(${distance > 0 ? Math.min(1, scrollY / distance) : 1})`;
+    function updateProgress() {
+      const distance = document.documentElement.scrollHeight - innerHeight;
+      if (progress)
+        progress.style.transform = `scaleX(${distance > 0 ? Math.min(1, scrollY / distance) : 1})`;
+    }
+    addEventListener("scroll", updateProgress, {
+      passive: true,
+      signal: articleEvents.signal,
+    });
+    addEventListener("resize", updateProgress, {
+      signal: articleEvents.signal,
+    });
+    updateProgress();
   }
-  addEventListener("scroll", updateProgress, { passive: true });
-  addEventListener("resize", updateProgress);
-  updateProgress();
+  document.addEventListener("astro:page-load", setupArticleTools);
+  document.addEventListener("astro:before-swap", () => articleEvents?.abort());
 </script>

@@ -1,0 +1,178 @@
+---
+import { readMusicLibrary } from "../lib/music";
+import MoonAura from "./MoonAura.astro";
+const library = await readMusicLibrary(import.meta.env.BASE_URL);
+---
+
+<aside
+  class="site-music"
+  data-site-music
+  transition:persist="site-music"
+  data-library={JSON.stringify(library)}
+  aria-label="背景音乐控制"
+>
+  <audio data-site-audio preload="none"></audio>
+  <div class="mini-player glass" data-mini-player hidden>
+    <div class="mini-caption">
+      <span class="mini-title" data-mini-title></span>
+      <time data-mini-time>00:00</time>
+    </div>
+    <button
+      class="mini-play moon-button"
+      data-mini-play
+      type="button"
+      aria-label="播放音乐"
+    >
+      <MoonAura />
+      <svg
+        data-mini-play-icon
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="m8 5 11 7-11 7V5Z" />
+      </svg>
+      <svg
+        data-mini-pause-icon
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+        hidden
+      >
+        <path d="M7 5h3v14H7zM14 5h3v14h-3z" />
+      </svg>
+    </button>
+  </div>
+  <button
+    class="background-switch moon-button glass"
+    data-bgm-toggle
+    type="button"
+    aria-label="背景音乐"
+    aria-pressed="false"
+    disabled={!library.backgroundId}
+    title={library.backgroundId ? "开启背景音乐" : "背景音乐暂未收录"}
+  >
+    <MoonAura />
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.4"
+      aria-hidden="true"
+    >
+      <path d="M9 18V5l12-2v13M9 9l12-2" />
+      <ellipse cx="6" cy="18" rx="3" ry="3" />
+      <ellipse cx="18" cy="16" rx="3" ry="3" />
+    </svg>
+    <span>背景音乐</span>
+    <span class="background-state" data-bgm-label>
+      {library.backgroundId ? "关" : "待收录"}
+    </span>
+  </button>
+  <p class="background-message" data-bgm-message role="status" hidden></p>
+</aside>
+
+<script>
+  import "../scripts/music-player";
+</script>
+
+<style>
+  :global(body) {
+    padding-bottom: 64px;
+  }
+  :global(body:has([data-mini-player]:not([hidden]))) {
+    padding-bottom: 136px;
+  }
+  .site-music {
+    position: fixed;
+    right: 24px;
+    bottom: 22px;
+    z-index: 15;
+    max-width: min(260px, calc(100vw - 36px));
+  }
+  .mini-player {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 12px 10px 16px;
+    margin-bottom: 9px;
+    border-radius: 16px;
+    width: 240px;
+    max-width: 100%;
+  }
+  .mini-caption {
+    min-width: 0;
+    flex: 1;
+    font-size: 11px;
+  }
+  .mini-title {
+    display: block;
+    color: #c4d9ec;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mini-caption time {
+    color: #8facc7;
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+  .mini-play {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--moon-edge);
+    border-radius: 50%;
+    color: #c4d9ec;
+    background: #a8d5ed12;
+  }
+  .background-switch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    padding: 11px 17px;
+    color: #c4d9ec;
+    font-size: 11px;
+    border-radius: 28px;
+  }
+  .background-state {
+    color: #8facc7;
+    font-size: 10px;
+  }
+  .background-switch[aria-pressed="true"] .background-state {
+    color: #c3eef5;
+  }
+  .background-switch:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+  .background-message {
+    margin: 8px 0 0;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: #081326eb;
+    color: #b2c9df;
+    font-size: 11px;
+    line-height: 1.8;
+  }
+  @media (max-width: 700px) {
+    .site-music {
+      right: 18px;
+      bottom: 16px;
+    }
+    .background-switch {
+      padding: 9px 13px;
+      gap: 8px;
+    }
+  }
+</style>

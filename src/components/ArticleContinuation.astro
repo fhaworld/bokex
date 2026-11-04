@@ -1,0 +1,160 @@
+---
+import { getCollection } from "astro:content";
+import FormattedDate from "./FormattedDate.astro";
+import PostCard from "./PostCard.astro";
+interface Props {
+  postId: string;
+}
+const { postId } = Astro.props;
+const posts = (await getCollection("blog")).sort(
+  (a, b) =>
+    b.data.pubDate.valueOf() - a.data.pubDate.valueOf() ||
+    a.id.localeCompare(b.id),
+);
+const index = posts.findIndex((post) => post.id === postId);
+const current = posts[index];
+const older = index >= 0 ? posts[index + 1] : undefined;
+const newer = index > 0 ? posts[index - 1] : undefined;
+const adjacent = [
+  { post: older, label: "上一篇", direction: "更早的手记", arrow: "←" },
+  { post: newer, label: "下一篇", direction: "更新的手记", arrow: "→" },
+].filter((item) => item.post);
+const related = current
+  ? posts
+      .filter(
+        (post) =>
+          post.id !== current.id &&
+          post.id !== older?.id &&
+          post.id !== newer?.id,
+      )
+      .map((post) => ({
+        post,
+        score: post.data.tags.filter((tag) => current.data.tags.includes(tag))
+          .length,
+      }))
+      .filter((item) => item.score > 0)
+      .sort(
+        (a, b) =>
+          b.score - a.score ||
+          b.post.data.pubDate.valueOf() - a.post.data.pubDate.valueOf() ||
+          a.post.id.localeCompare(b.post.id),
+      )
+      .slice(0, 2)
+  : [];
+---
+
+{adjacent.length > 0 && (
+  <nav class="adjacent-posts" aria-label="上一篇和下一篇">
+    {adjacent.map(
+      ({ post, label, direction, arrow }) =>
+        post && (
+          <a
+            class="adjacent-post glass"
+            href={`${import.meta.env.BASE_URL}blog/${post.id}/`}
+          >
+            <span class="adjacent-label">
+              {label}
+              <span>
+                {direction} {arrow}
+              </span>
+            </span>
+            <h2>{post.data.title}</h2>
+            <FormattedDate date={post.data.pubDate} />
+          </a>
+        ),
+    )}
+  </nav>
+)}
+{related.length > 0 && (
+  <section class="related-posts" aria-labelledby="related-posts-title">
+    <div class="related-heading">
+      <div>
+        <p class="eyebrow">A LITTLE FURTHER</p>
+        <h2 id="related-posts-title">沿着文字，再走一段</h2>
+      </div>
+      <span>相同标签 · 延伸阅读</span>
+    </div>
+    <div class="related-grid">
+      {related.map(({ post }, index) => (
+        <PostCard post={post} index={index} />
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .adjacent-posts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .adjacent-post {
+    display: block;
+    padding: 23px 25px;
+    min-width: 0;
+  }
+  .adjacent-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    color: #b7def1;
+    font-size: 11px;
+  }
+  .adjacent-label > span {
+    color: #8da6c3;
+    font-size: 9px;
+  }
+  .adjacent-post h2 {
+    font-size: 19px;
+    line-height: 1.7;
+    margin: 13px 0 11px;
+  }
+  .adjacent-post :global(time) {
+    color: #8da6c3;
+    font-size: 10px;
+  }
+  .related-posts {
+    margin-top: 38px;
+  }
+  .related-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 19px;
+  }
+  .related-heading .eyebrow {
+    margin: 0 0 7px;
+    font-size: 8px;
+  }
+  .related-heading h2 {
+    font-size: 22px;
+  }
+  .related-heading > span {
+    font-size: 10px;
+    color: #8da6c3;
+  }
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .related-grid :global(.post-card) {
+    padding: 22px;
+  }
+  .related-grid :global(.post-meta) {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .related-grid :global(.post-card h3) {
+    font-size: 20px;
+  }
+  @media (max-width: 700px) {
+    .related-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

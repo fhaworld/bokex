@@ -1,0 +1,527 @@
+---
+import MoonAura from "./MoonAura.astro";
+import MoonClock from "./MoonClock.astro";
+---
+
+<section
+  class="music-section"
+  id="music"
+  aria-labelledby="music-title"
+  data-music-panel
+>
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">AFTER HOURS</p>
+      <h2 id="music-title">
+        月下电台<span class="heading-dot">.</span>
+      </h2>
+    </div>
+    <span class="music-count" data-music-count>
+      0 首音乐
+    </span>
+  </div>
+  <div class="music-room glass">
+    <div class="now-playing">
+      <div class="track-heading">
+        <div class="music-disc" aria-hidden="true">
+          <span>☾</span>
+        </div>
+        <div class="track-caption">
+          <p class="eyebrow" data-music-mode>
+            MOONLIT SOUNDS
+          </p>
+          <h3 class="music-title" data-music-title>
+            暂未收录音乐
+          </h3>
+          <p class="music-subtitle" data-music-subtitle>
+            等一段旋律，落在这个夜晚。
+          </p>
+        </div>
+      </div>
+      <div class="music-transport">
+        <button
+          class="transport-button moon-button"
+          type="button"
+          data-music-previous
+          aria-label="上一首"
+          disabled
+        >
+          <MoonAura />
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            aria-hidden="true"
+          >
+            <path d="M5 5v14M19 5 8 12l11 7V5Z" />
+          </svg>
+        </button>
+        <button
+          class="transport-button main-play moon-button"
+          type="button"
+          data-music-play
+          aria-label="播放音乐"
+          disabled
+        >
+          <MoonAura />
+          <svg
+            data-play-icon
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="m8 5 11 7-11 7V5Z" />
+          </svg>
+          <svg
+            data-pause-icon
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+            hidden
+          >
+            <path d="M7 5h3v14H7zM14 5h3v14h-3z" />
+          </svg>
+        </button>
+        <button
+          class="transport-button moon-button"
+          type="button"
+          data-music-next
+          aria-label="下一首"
+          disabled
+        >
+          <MoonAura />
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            aria-hidden="true"
+          >
+            <path d="M19 5v14M5 5l11 7-11 7V5Z" />
+          </svg>
+        </button>
+      </div>
+      <div class="music-timeline">
+        <time data-music-elapsed>00:00</time>
+        <input
+          data-music-seek
+          type="range"
+          min="0"
+          max="1"
+          step="0.1"
+          value="0"
+          aria-label="播放进度"
+          disabled
+        />
+        <time data-music-duration>--:--</time>
+      </div>
+      <div class="player-tools">
+        <div class="music-volume">
+          <label for="music-volume">音量</label>
+          <input
+            id="music-volume"
+            data-music-volume
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value="0.25"
+            aria-label="音乐音量"
+            disabled
+          />
+          <span data-volume-value>25%</span>
+        </div>
+        <button
+          class="playlist-toggle moon-button"
+          type="button"
+          data-playlist-toggle
+          popovertarget="music-playlist"
+          aria-controls="music-playlist"
+          aria-expanded="false"
+          aria-label="打开播放列表"
+        >
+          <MoonAura />
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.4"
+            aria-hidden="true"
+          >
+            <path d="M4 6h16M4 12h10M4 18h10m4-5v8m-3-3 3 3 3-3" />
+          </svg>
+          <span>播放列表</span>
+        </button>
+      </div>
+      <p class="music-message" data-music-message></p>
+    </div>
+    <MoonClock />
+  </div>
+  <div
+    class="playlist-panel glass"
+    id="music-playlist"
+    data-playlist-popover
+    popover="auto"
+    role="dialog"
+    aria-labelledby="playlist-title"
+  >
+    <div class="playlist-heading">
+      <div>
+        <p class="eyebrow">CHOOSE A MELODY</p>
+        <h3 id="playlist-title">今夜的旋律</h3>
+      </div>
+      <button
+        class="playlist-close moon-button"
+        type="button"
+        popovertarget="music-playlist"
+        popovertargetaction="hide"
+        data-playlist-close
+        aria-label="关闭播放列表"
+      >
+        <MoonAura />
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <p class="playlist-hint">
+      选择一首，即刻播放 <span>顺序循环</span>
+    </p>
+    <ol class="music-list" data-music-list>
+      <li class="music-empty">曲库整理中，稍后再来听听。</li>
+    </ol>
+  </div>
+  <noscript>
+    <p class="music-noscript">开启 JavaScript 后可以使用音乐播放器。</p>
+  </noscript>
+</section>
+
+<style>
+  .music-section {
+    margin: 0 0 50px;
+  }
+  .music-count {
+    font-size: 11px;
+    color: #99b0c8;
+  }
+  .music-room {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    overflow: hidden;
+  }
+  .now-playing {
+    padding: 32px;
+    min-width: 0;
+  }
+  .track-heading {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+  .track-caption {
+    min-width: 0;
+  }
+  .track-caption .eyebrow {
+    font-size: 8px;
+    margin-bottom: 9px;
+  }
+  .music-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+  .music-subtitle {
+    font-size: 11px;
+    color: #8fa9c6;
+    margin: 8px 0 0;
+  }
+  .music-disc {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 86px;
+    height: 86px;
+    border: 1px solid #abcce22b;
+    border-radius: 50%;
+    background:
+      repeating-radial-gradient(circle, transparent 0 3px, #a3c5e110 4px 5px),
+      conic-gradient(from 30deg, #0c1930, #29445f, #0b1930, #2b445b, #0c1930);
+    animation: record-turn 28s linear infinite;
+    animation-play-state: paused;
+  }
+  .music-disc span {
+    display: grid;
+    place-items: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #101f35;
+    border: 1px solid #c7e9f033;
+    color: #b7dce9;
+    font-size: 23px;
+  }
+  [data-playing="true"] .music-disc {
+    animation-play-state: running;
+  }
+  .music-transport {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin: 28px 0 20px;
+  }
+  .transport-button {
+    display: grid;
+    place-items: center;
+    width: 37px;
+    height: 37px;
+    border: 1px solid var(--moon-edge);
+    border-radius: 50%;
+    background: #a6c9e408;
+    color: #c1dfee;
+  }
+  .main-play {
+    width: 46px;
+    height: 46px;
+    background: #a8d5ed17;
+  }
+  button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .music-timeline {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+  .music-timeline time {
+    color: #91a9c4;
+    font-size: 10px;
+    min-width: 30px;
+    font-variant-numeric: tabular-nums;
+  }
+  input[type="range"] {
+    min-width: 0;
+    height: 16px;
+    padding: 0;
+    margin: 0;
+    accent-color: #addbe9;
+    cursor: pointer;
+  }
+  input:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .music-timeline input {
+    width: 100%;
+  }
+  .music-volume {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+    margin-top: 0;
+    font-size: 10px;
+    color: #8da6c0;
+  }
+  .music-volume input {
+    width: 95px;
+  }
+  .music-volume span {
+    min-width: 27px;
+  }
+  .music-message {
+    min-height: 18px;
+    margin: 12px 0 0;
+    color: #a6bfd7;
+    font-size: 11px;
+    text-align: center;
+  }
+  .playlist-panel {
+    display: none;
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    width: min(380px, calc(100% - 32px));
+    max-height: calc(100dvh - 32px);
+    padding: 22px 18px 16px;
+    background: linear-gradient(130deg, #172e49f2, #0a192eeb);
+    border: 1px solid #c4e7fc45;
+    border-radius: 18px;
+    color: var(--ink);
+    box-shadow:
+      0 20px 70px #020a2080,
+      inset 0 1px 0 #e6f6ff22,
+      0 0 30px #8dcdf00c;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .playlist-panel::backdrop {
+    background: transparent;
+  }
+  .playlist-panel:popover-open {
+    display: block;
+  }
+  .playlist-panel[data-open="true"] {
+    display: block;
+  }
+  .playlist-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px 12px;
+    font-size: 12px;
+    color: #bfd3e4;
+  }
+  .playlist-heading .eyebrow {
+    font-size: 7px;
+    margin-bottom: 5px;
+  }
+  .playlist-heading h3 {
+    font-family: var(--serif);
+    font-size: 20px;
+    letter-spacing: 0.08em;
+  }
+  .playlist-hint {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: #8ea8c3;
+    font-size: 10px;
+    margin: 0 4px 14px;
+  }
+  .playlist-close {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid #b4d9f52b;
+    border-radius: 50%;
+    background: #a8d5ed0a;
+    color: #c7e3f3;
+    font-size: 21px;
+    line-height: 1;
+  }
+  .player-tools {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 17px;
+    margin-top: 22px;
+  }
+  .playlist-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 8px 12px;
+    background: #a8d5ed0a;
+    color: #c4ddea;
+    border: 1px solid var(--moon-edge);
+    border-radius: 9px;
+    font-size: 10px;
+  }
+  .music-list {
+    max-height: min(260px, calc(100dvh - 164px));
+    overflow-y: auto;
+    overflow-x: hidden;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    scrollbar-width: thin;
+    scrollbar-color: #8bb6cf33 transparent;
+    overscroll-behavior: contain;
+  }
+  .music-list :global(.music-track) {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 13px;
+    padding: 12px 10px;
+    text-align: left;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: #a8bfd6;
+    font-size: 12px;
+  }
+  .music-list :global(.music-track:hover),
+  .music-list :global(.music-track[aria-current="true"]) {
+    background: #a0d4ed0d;
+    color: #d6eef8;
+    border-color: #9dcee51c;
+  }
+  .music-list :global(.track-number) {
+    color: #7395b6;
+    font-size: 9px;
+    font-variant-numeric: tabular-nums;
+  }
+  .music-list :global(.track-name) {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .music-list :global(.track-state) {
+    font-size: 9px;
+    color: #9bcbdc;
+    flex-shrink: 0;
+  }
+  .music-empty {
+    padding: 60px 12px;
+    text-align: center;
+    color: #8ca5c0;
+    font-size: 12px;
+  }
+  .music-noscript {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  @keyframes record-turn {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .music-disc {
+      animation: none;
+    }
+  }
+  @media (max-width: 700px) {
+    .music-room {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .now-playing {
+      padding: 25px 22px 16px;
+    }
+    .track-heading {
+      gap: 17px;
+    }
+    .music-disc {
+      width: 70px;
+      height: 70px;
+    }
+    .music-title {
+      font-size: 20px;
+    }
+    .player-tools {
+      justify-content: center;
+      gap: 15px 20px;
+    }
+  }
+</style>

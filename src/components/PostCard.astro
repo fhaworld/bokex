@@ -4,12 +4,21 @@ import FormattedDate from "./FormattedDate.astro";
 interface Props {
   post: CollectionEntry<"blog">;
   index?: number;
+  layout?: "card" | "list";
 }
-const { post, index = 0 } = Astro.props;
+const { post, index = 0, layout = "card" } = Astro.props;
 const minutes = Math.max(1, Math.ceil((post.body?.length ?? 0) / 650));
 ---
 
-<article class="post-card glass" style={`--card-index:${index}`}>
+<article
+  class:list={["post-card", "glass", { "post-card--list": layout === "list" }]}
+  style={`--card-index:${index}`}
+>
+  {layout === "list" && (
+    <span class="entry-index" aria-hidden="true">
+      {String(index + 1).padStart(2, "0")}
+    </span>
+  )}
   <div class="post-meta">
     <span>{post.data.tags[0] ?? "未分类"}</span>
     <span>

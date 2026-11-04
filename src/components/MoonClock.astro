@@ -1,0 +1,329 @@
+---
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+const faceFile = ["png", "webp", "avif", "jpg"]
+  .map((extension) => `moon-clock-face.${extension}`)
+  .find((name) => existsSync(resolve(process.cwd(), "public/images", name)));
+const faceUrl = faceFile
+  ? `${import.meta.env.BASE_URL}images/${faceFile}`
+  : undefined;
+const marks = Array.from({ length: 60 }, (_, index) => index);
+// Leave the outer moon phases and foliage clear on the illustrated dial.
+const dialViewBox = faceUrl ? "-24 -24 248 248" : "0 0 200 200";
+---
+
+<section class="moon-clock" data-moon-clock aria-labelledby="clock-title">
+  <div class="clock-heading">
+    <p class="eyebrow">THE QUIET HOURS</p>
+    <h3 id="clock-title">月下时计</h3>
+  </div>
+  <div class="clock-dial" data-clock-dial role="img" aria-label="本地时间表盘">
+    <div class="dial-base" aria-hidden="true"></div>
+    {faceUrl && (
+      <img
+        class="clock-art"
+        data-clock-art
+        src={faceUrl}
+        width="1254"
+        height="1254"
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
+    )}
+    <svg
+      class="clock-markings"
+      viewBox={dialViewBox}
+      fill="none"
+      aria-hidden="true"
+    >
+      {!faceUrl && (
+        <>
+          <circle class="dial-rim" cx="100" cy="100" r="92" />
+          <circle class="dial-inner-rim" cx="100" cy="100" r="88" />
+          <circle class="dial-engraving" cx="100" cy="100" r="69" />
+        </>
+      )}
+      {marks.map((index) => (
+        <line
+          x1="100"
+          y1={index % 5 === 0 ? "18" : "16"}
+          x2="100"
+          y2={index % 5 === 0 ? "24" : "18"}
+          transform={`rotate(${index * 6} 100 100)`}
+          class:list={["clock-tick", { "clock-tick--hour": index % 5 === 0 }]}
+        />
+      ))}
+      <g class="clock-numerals" text-anchor="middle" dominant-baseline="middle">
+        <text x="100" y="38">
+          XII
+        </text>
+        <text x="163" y="101">
+          III
+        </text>
+        <text x="100" y="165">
+          VI
+        </text>
+        <text x="37" y="101">
+          IX
+        </text>
+      </g>
+      {!faceUrl && <path class="clock-emblem" d="M105 137a6 6 0 1 0 0 11 7 7 0 0 1 0-11Z" />}
+    </svg>
+    <svg class="clock-hands" viewBox={dialViewBox} aria-hidden="true">
+      <defs>
+        <linearGradient
+          id="clock-hand-light"
+          x1="100"
+          y1="25"
+          x2="100"
+          y2="112"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stop-color="#f0fcff" />
+          <stop offset=".65" stop-color="#a7d9f0" />
+          <stop offset="1" stop-color="#769ebc" />
+        </linearGradient>
+      </defs>
+      <g class="clock-hour" data-clock-hour>
+        <path
+          d="M100 50 102.1 94 101.2 111 98.8 111 97.9 94Z"
+          fill="url(#clock-hand-light)"
+        />
+      </g>
+      <g class="clock-minute" data-clock-minute>
+        <path
+          d="M100 29 101.4 96 100.8 113 99.2 113 98.6 96Z"
+          fill="url(#clock-hand-light)"
+        />
+      </g>
+      <g class="clock-second" data-clock-second>
+        <path
+          d="M100 24V119"
+          fill="none"
+          stroke="#bdefff"
+          stroke-width=".65"
+          stroke-linecap="round"
+        />
+        <circle cx="100" cy="116" r="2" fill="#adcfe7" />
+      </g>
+      <circle class="clock-pivot-glow" cx="100" cy="100" r="5" />
+      <circle cx="100" cy="100" r="2.7" fill="#e6f9ff" />
+      <circle cx="100" cy="100" r="1" fill="#8dc1de" />
+    </svg>
+  </div>
+  <div class="clock-caption">
+    <time class="clock-time" data-clock-time>
+      --:--:--
+    </time>
+    <p>
+      <span data-clock-date>今夜，月色正好。</span>
+      <span class="clock-local">本地时间</span>
+    </p>
+  </div>
+  <div
+    class="site-uptime"
+    data-site-uptime
+    data-start="2025-12-15T13:31:00+08:00"
+    title="起算时间：2025-12-15 13:31（北京时间 UTC+8）"
+  >
+    <p class="uptime-label"><span aria-hidden="true"></span>本站已运行</p>
+    <p class="uptime-counter" role="timer" aria-label="本站运行时长">
+      <span><strong data-uptime-days>--</strong>天</span>
+      <span><strong data-uptime-hours>--</strong>时</span>
+      <span><strong data-uptime-minutes>--</strong>分</span>
+      <span><strong data-uptime-seconds>--</strong>秒</span>
+    </p>
+  </div>
+</section>
+
+<script>
+  import "../scripts/moon-clock";
+</script>
+
+<style>
+  .moon-clock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 24px 26px;
+    border-left: 1px solid var(--line);
+    min-width: 0;
+  }
+  .clock-heading {
+    text-align: center;
+  }
+  .clock-heading .eyebrow {
+    font-size: 7px;
+    margin: 0 0 5px;
+    letter-spacing: 0.27em;
+    color: #8daec8;
+  }
+  .clock-heading h3 {
+    font-family: var(--serif);
+    font-size: 18px;
+    letter-spacing: 0.2em;
+    color: #cde5f2;
+  }
+  .clock-dial {
+    position: relative;
+    width: min(100%, 232px);
+    aspect-ratio: 1;
+    flex-shrink: 0;
+    isolation: isolate;
+  }
+  .dial-base {
+    position: absolute;
+    inset: 4%;
+    border-radius: 50%;
+    background:
+      radial-gradient(ellipse at 30% 15%, #9dd9f922, transparent 48%),
+      radial-gradient(circle, #0d1c32b3, #10284166 64%, #a4d4f31a 96%);
+    box-shadow:
+      inset 0 0 20px #a4d9f518,
+      0 0 26px #78c4e70b;
+  }
+  .clock-art,
+  .clock-markings,
+  .clock-hands {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .clock-art {
+    object-fit: contain;
+    /* The supplied artwork's optical center is (621, 633) on its 1254px canvas. */
+    transform: translate(0.48%, -0.48%);
+  }
+  .dial-rim {
+    stroke: #a8d9ee66;
+    stroke-width: 0.6;
+  }
+  .dial-inner-rim {
+    stroke: #a8d9ee22;
+    stroke-width: 0.5;
+  }
+  .dial-engraving {
+    stroke: #a8d9ee11;
+    stroke-width: 0.5;
+  }
+  .clock-tick {
+    stroke: #b0d3ea55;
+    stroke-width: 0.55;
+  }
+  .clock-tick--hour {
+    stroke: #cee9f3bb;
+    stroke-width: 0.85;
+  }
+  .clock-numerals {
+    fill: #bfddea;
+    font-family: Georgia, serif;
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+  .clock-emblem {
+    fill: #a0d2e77a;
+  }
+  .clock-hands {
+    opacity: 0;
+  }
+  [data-clock-ready="true"] .clock-hands {
+    opacity: 1;
+  }
+  .clock-hour,
+  .clock-minute {
+    filter: drop-shadow(0 0 2px #b8e9ff88) drop-shadow(0 0 5px #7acaff55);
+  }
+  .clock-second {
+    filter: drop-shadow(0 0 2px #cef6ff99) drop-shadow(0 0 6px #88d5fa66);
+  }
+  .clock-pivot-glow {
+    fill: #a4dafa33;
+    filter: blur(2px);
+  }
+  .clock-caption {
+    text-align: center;
+  }
+  .clock-time {
+    color: #c9e5f3;
+    font-size: 17px;
+    letter-spacing: 0.19em;
+    font-variant-numeric: tabular-nums;
+  }
+  .clock-caption p {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 3px 0 0;
+    font-size: 9px;
+    color: #93acc6;
+  }
+  .clock-local {
+    padding-left: 12px;
+    border-left: 1px solid #abcde92b;
+    color: #7e9cb7;
+  }
+  .site-uptime {
+    width: min(100%, 260px);
+    margin-top: 8px;
+    padding-top: 14px;
+    border-top: 1px solid #abcde922;
+    text-align: center;
+  }
+  .uptime-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 0 8px;
+    color: #9bb7ce;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+  }
+  .uptime-label > span {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #c4e7f5;
+    box-shadow: 0 0 8px #9ed9ff88;
+  }
+  .uptime-counter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 6px 12px;
+    margin: 0;
+    color: #91aac2;
+    font-size: 10px;
+  }
+  .uptime-counter > span {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+  .uptime-counter strong {
+    font-size: 15px;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    color: #d0e9f6;
+    text-shadow: 0 0 10px #a6d8ef22;
+  }
+  @media (max-width: 700px) {
+    .moon-clock {
+      border-left: 0;
+      border-top: 1px solid var(--line);
+      padding: 24px 22px;
+    }
+    .clock-dial {
+      width: min(100%, 222px);
+    }
+  }
+</style>

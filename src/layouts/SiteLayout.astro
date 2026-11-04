@@ -3,6 +3,8 @@ import BaseHead from "../components/BaseHead.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import NightSky from "../components/NightSky.astro";
+import SiteMusic from "../components/SiteMusic.astro";
+import { ClientRouter } from "astro:transitions";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
 interface Props {
   title?: string;
@@ -12,12 +14,13 @@ const { title = SITE_TITLE, description = SITE_DESCRIPTION } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" transition:animate="none">
   <head>
     <BaseHead
       title={title === SITE_TITLE ? title : `${title} · ${SITE_TITLE}`}
       description={description}
     />
+    <ClientRouter fallback="swap" />
   </head>
   <body id="top">
     <NightSky />
@@ -28,5 +31,6 @@ const { title = SITE_TITLE, description = SITE_DESCRIPTION } = Astro.props;
       </main>
       <Footer />
     </div>
+    <SiteMusic />
   </body>
 </html>

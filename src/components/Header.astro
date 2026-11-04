@@ -1,5 +1,6 @@
 ---
 import { SITE_TITLE } from "../consts";
+import MoonAura from "./MoonAura.astro";
 const base = import.meta.env.BASE_URL;
 const path = Astro.url.pathname.slice(base.length).replace(/\/$/, "");
 const links = [
@@ -26,43 +27,54 @@ const links = [
   <nav aria-label="主导航">
     {links.map(([url, label]) => (
       <a
+        class="moon-button"
         href={`${base}${url ? `${url}/` : ""}`}
         aria-current={
           (url ? path.startsWith(url) : path === "") ? "page" : undefined
         }
       >
+        <MoonAura />
         {label}
       </a>
     ))}
   </nav>
   <button
-    class="motion-toggle"
+    class="motion-toggle moon-button"
     type="button"
     aria-pressed="false"
-    title="暂停背景动效"
+    title="暂停页面动效"
   >
-    动效 · 开
+    <MoonAura />
+    <span data-motion-label>动效 · 开</span>
   </button>
 </header>
 <script>
-  const button = document.querySelector<HTMLButtonElement>(".motion-toggle");
   let paused = matchMedia("(prefers-reduced-motion: reduce)").matches;
   try {
     paused = localStorage.getItem("moon-motion") === "off" || paused;
   } catch {}
   function updateMotion() {
+    const button = document.querySelector<HTMLButtonElement>(".motion-toggle");
+    const label = button?.querySelector("[data-motion-label]");
     document.documentElement.dataset.motion = paused ? "off" : "on";
-    if (!button) return;
-    button.textContent = paused ? "动效 · 关" : "动效 · 开";
+    if (!button || !label) return;
+    label.textContent = paused ? "动效 · 关" : "动效 · 开";
     button.setAttribute("aria-pressed", String(paused));
-    button.title = paused ? "开启背景动效" : "暂停背景动效";
+    button.title = paused ? "开启页面动效" : "暂停页面动效";
   }
   updateMotion();
-  button?.addEventListener("click", () => {
-    paused = !paused;
+  document.addEventListener("astro:after-swap", updateMotion);
+  document.addEventListener("astro:page-load", () => {
     updateMotion();
-    try {
-      localStorage.setItem("moon-motion", paused ? "off" : "on");
-    } catch {}
+    const button = document.querySelector<HTMLButtonElement>(".motion-toggle");
+    if (!button || button.dataset.motionReady) return;
+    button.dataset.motionReady = "true";
+    button.addEventListener("click", () => {
+      paused = !paused;
+      updateMotion();
+      try {
+        localStorage.setItem("moon-motion", paused ? "off" : "on");
+      } catch {}
+    });
   });
 </script>

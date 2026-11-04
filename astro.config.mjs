@@ -3,12 +3,14 @@
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { defineConfig, fontProviders } from 'astro/config';
+import { musicDevFiles } from './scripts/music-dev.ts';
 
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://fhaworld.github.io',
 	base: '/bokex/',
 	integrations: [mdx(), sitemap()],
+	vite: { plugins: [musicDevFiles()] },
 	fonts: [
 		{
 			provider: fontProviders.local(),

@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import SiteLayout from "../../layouts/SiteLayout.astro";
 import PostCard from "../../components/PostCard.astro";
+import MoonAura from "../../components/MoonAura.astro";
 const posts = (await getCollection("blog")).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
@@ -9,87 +10,450 @@ const tags = [...new Set(posts.flatMap((post) => post.data.tags))];
 ---
 
 <SiteLayout title="全部手记">
-  <section class="page-intro">
-    <p class="eyebrow">THE JOURNAL</p>
-    <h1>
-      把日子，写成手记<span class="heading-dot">.</span>
-    </h1>
-    <p>一些探索，一些片刻。共 {posts.length} 篇文字，等待与你相遇。</p>
-  </section>
-  <section aria-label="查找文章">
-    <div class="filter-bar glass">
-      <label class="search-label">
-        <span aria-hidden="true">⌕</span>
-        <span class="sr-only">搜索文章标题、描述和正文</span>
-        <input
-          type="search"
-          id="post-search"
-          placeholder="搜索标题、内容或灵感…"
-          autocomplete="off"
-        />
-      </label>
-      <span id="result-count" aria-live="polite">
-        {posts.length} 篇手记
-      </span>
-    </div>
-    <div class="tag-filters" role="group" aria-label="按标签筛选">
-      <button type="button" data-tag="" aria-pressed="true">
-        全部
-      </button>
-      {tags.map((tag) => (
-        <button type="button" data-tag={tag} aria-pressed="false">
-          # {tag}
-        </button>
-      ))}
-    </div>
-    <div class="article-grid" id="post-results">
-      {posts.map((post, index) => (
-        <div
-          data-post
-          data-search={`${post.data.title} ${post.data.description} ${post.body ?? ""} ${post.data.tags.join(" ")}`.toLocaleLowerCase()}
-          data-tags={JSON.stringify(post.data.tags)}
-        >
-          <PostCard post={post} index={index} />
+  <div class="journal-page">
+    <section class="journal-intro">
+      <p class="eyebrow">THE JOURNAL</p>
+      <h1>
+        把日子，写成手记<span class="heading-dot">.</span>
+      </h1>
+      <p>一些探索，一些片刻。让值得记住的事情，有迹可循。</p>
+    </section>
+    <section aria-label="查找文章">
+      <div class="journal-tools glass">
+        <div class="journal-search-row">
+          <label class="search-label">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.4"
+              aria-hidden="true"
+            >
+              <circle cx="10.5" cy="10.5" r="6.5" />
+              <path d="m16 16 4.5 4.5" />
+            </svg>
+            <span class="sr-only">搜索文章标题、描述和正文</span>
+            <input
+              type="search"
+              id="post-search"
+              placeholder="寻找一篇手记…"
+              autocomplete="off"
+            />
+          </label>
+          <div class="filter-search-meta">
+            <span id="result-count" aria-live="polite">
+              {posts.length} 篇手记
+            </span>
+            <button
+              class="filter-reset moon-button"
+              id="reset-filters"
+              type="button"
+            >
+              <MoonAura />
+              重置筛选
+            </button>
+          </div>
         </div>
-      ))}
-    </div>
-    <p id="empty-results" class="empty-state glass" hidden>
-      这片夜空暂时没有找到对应的文字。试试其他关键词。
-    </p>
-    <noscript>
-      <p>启用 JavaScript 后可以使用搜索与筛选，所有文章已列出。</p>
-    </noscript>
-  </section>
+        <details class="article-filters">
+          <summary class="filter-toggle moon-button">
+            <MoonAura />
+            <span>筛选条件</span>
+            <span id="filter-summary">全部标签 · 全部时间</span>
+            <svg
+              class="filter-chevron"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              aria-hidden="true"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </summary>
+          <div class="filter-options">
+            <fieldset class="filter-group">
+              <legend>
+                标签 <span>可多选，匹配任一标签</span>
+              </legend>
+              <div class="tag-filters">
+                <button
+                  class="moon-button"
+                  type="button"
+                  data-tag=""
+                  aria-pressed="true"
+                >
+                  <MoonAura />
+                  全部
+                </button>
+                {tags.map((tag) => (
+                  <button
+                    class="moon-button"
+                    type="button"
+                    data-tag={tag}
+                    aria-pressed="false"
+                  >
+                    <MoonAura /># {tag}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset class="filter-group">
+              <legend>发布时间</legend>
+              <div class="date-controls">
+                <label class="date-field time-preset">
+                  <span>时间范围</span>
+                  <select id="time-range">
+                    <option value="all">全部时间</option>
+                    <option value="30">近30天</option>
+                    <option value="90">近90天</option>
+                    <option value="year">今年</option>
+                    <option value="custom">自定义范围</option>
+                  </select>
+                </label>
+                <label class="date-field">
+                  <span>开始日期</span>
+                  <input
+                    id="published-from"
+                    type="date"
+                    aria-describedby="date-filter-help date-filter-error"
+                  />
+                </label>
+                <label class="date-field">
+                  <span>结束日期</span>
+                  <input
+                    id="published-to"
+                    type="date"
+                    aria-describedby="date-filter-help date-filter-error"
+                  />
+                </label>
+              </div>
+              <p id="date-filter-help" class="date-filter-help">
+                起止日期均包含当天，也可以只填写一端。
+              </p>
+              <p
+                id="date-filter-error"
+                class="date-filter-error"
+                role="alert"
+                hidden
+              ></p>
+            </fieldset>
+          </div>
+        </details>
+      </div>
+      <div class="journal-list-heading">
+        <div class="journal-list-title">
+          <h2>手记目录</h2>
+          <p id="sort-summary" aria-live="polite">
+            按时间 · 从新到旧
+          </p>
+        </div>
+        <div class="journal-sort" role="group" aria-label="文章排序">
+          <div class="sort-fields" role="group" aria-label="排序依据">
+            <button
+              class="moon-button"
+              type="button"
+              data-sort-by="date"
+              aria-pressed="true"
+            >
+              <MoonAura />
+              时间
+            </button>
+            <button
+              class="moon-button"
+              type="button"
+              data-sort-by="title"
+              aria-pressed="false"
+            >
+              <MoonAura />
+              标题
+            </button>
+          </div>
+          <button
+            class="sort-direction moon-button"
+            id="sort-order"
+            type="button"
+            data-order="desc"
+            aria-label="当前倒序，切换为正序"
+            title="从新到旧，点击切换为正序"
+          >
+            <MoonAura />
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              aria-hidden="true"
+            >
+              <path d="M8 4v16m-4-4 4 4 4-4M15 4h5m-5 5h3" />
+            </svg>
+            <span data-sort-order-label>倒序</span>
+          </button>
+        </div>
+      </div>
+      <div
+        class="journal-results glass"
+        id="post-results"
+        hidden={posts.length === 0}
+      >
+        {posts.map((post, index) => (
+          <div
+            data-post
+            data-title={post.data.title}
+            data-sort-time={post.data.pubDate.valueOf()}
+            data-search={`${post.data.title} ${post.data.description} ${post.body ?? ""} ${post.data.tags.join(" ")}`.toLocaleLowerCase()}
+            data-tags={JSON.stringify(post.data.tags)}
+            data-published={
+              post.data.pubDate.getFullYear() * 10000 +
+              (post.data.pubDate.getMonth() + 1) * 100 +
+              post.data.pubDate.getDate()
+            }
+          >
+            <PostCard post={post} index={index} layout="list" />
+          </div>
+        ))}
+      </div>
+      <div
+        id="empty-results"
+        class="empty-state glass"
+        hidden={posts.length > 0}
+      >
+        <span class="empty-moon" aria-hidden="true">
+          ☾
+        </span>
+        <p>这片夜空，暂时没有对应的文字。</p>
+        <span>试试调整标签或日期范围，也可以重置筛选。</span>
+      </div>
+      <noscript>
+        <p>启用 JavaScript 后可以使用搜索与筛选，所有文章已列出。</p>
+      </noscript>
+    </section>
+  </div>
 </SiteLayout>
 <script>
-  const search = document.querySelector<HTMLInputElement>("#post-search");
-  const buttons = document.querySelectorAll<HTMLButtonElement>("[data-tag]");
-  const posts = document.querySelectorAll<HTMLElement>("[data-post]");
-  let selectedTag = "";
-  function filterPosts() {
-    const query = search?.value.trim().toLocaleLowerCase() ?? "";
-    let count = 0;
-    posts.forEach((post) => {
-      const matches =
-        (post.dataset.search ?? "").includes(query) &&
-        (!selectedTag ||
-          JSON.parse(post.dataset.tags ?? "[]").includes(selectedTag));
-      post.hidden = !matches;
-      if (matches) count++;
+  function setupFilters() {
+    const search = document.querySelector<HTMLInputElement>("#post-search");
+    if (!search || search.dataset.filtersReady) return;
+    search.dataset.filtersReady = "true";
+    const buttons = document.querySelectorAll<HTMLButtonElement>("[data-tag]");
+    const posts = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-post]"),
+      (element, index) => ({
+        element,
+        title: element.dataset.title ?? "",
+        time: Number(element.dataset.sortTime),
+        published: Number(element.dataset.published),
+        tags: JSON.parse(element.dataset.tags ?? "[]") as string[],
+        searchText: element.dataset.search ?? "",
+        originalIndex: index,
+      }),
+    );
+    const timeRange = document.querySelector<HTMLSelectElement>("#time-range")!;
+    const startDate =
+      document.querySelector<HTMLInputElement>("#published-from")!;
+    const endDate = document.querySelector<HTMLInputElement>("#published-to")!;
+    const reset = document.querySelector<HTMLButtonElement>("#reset-filters")!;
+    const counter = document.querySelector("#result-count")!;
+    const summary = document.querySelector("#filter-summary")!;
+    const dateError =
+      document.querySelector<HTMLElement>("#date-filter-error")!;
+    const empty = document.querySelector<HTMLElement>("#empty-results")!;
+    const results = document.querySelector<HTMLElement>("#post-results")!;
+    const selectedTags = new Set<string>();
+    const sortButtons =
+      document.querySelectorAll<HTMLButtonElement>("[data-sort-by]");
+    const orderButton =
+      document.querySelector<HTMLButtonElement>("#sort-order")!;
+    const orderLabel = orderButton.querySelector<HTMLElement>(
+      "[data-sort-order-label]",
+    )!;
+    const sortSummary = document.querySelector<HTMLElement>("#sort-summary")!;
+    const titleCollator = new Intl.Collator("zh-CN", {
+      numeric: true,
+      sensitivity: "base",
     });
-    const counter = document.querySelector("#result-count");
-    if (counter) counter.textContent = `${count} 篇手记`;
-    const empty = document.querySelector<HTMLElement>("#empty-results");
-    if (empty) empty.hidden = count > 0;
-  }
-  search?.addEventListener("input", filterPosts);
-  buttons.forEach((button) =>
-    button.addEventListener("click", () => {
-      selectedTag = button.dataset.tag ?? "";
-      buttons.forEach((item) =>
-        item.setAttribute("aria-pressed", String(item === button)),
+    let sortBy: "date" | "title" = "date";
+    let sortOrder: "asc" | "desc" = "desc";
+    try {
+      const saved = JSON.parse(
+        sessionStorage.getItem("moon-journal-sort") ?? "null",
       );
+      if (saved?.by === "date" || saved?.by === "title") sortBy = saved.by;
+      if (saved?.order === "asc" || saved?.order === "desc")
+        sortOrder = saved.order;
+    } catch {}
+
+    function sortPosts() {
+      const direction = sortOrder === "asc" ? 1 : -1;
+      posts.sort((a, b) => {
+        const titleOrder = titleCollator.compare(a.title, b.title);
+        const timeOrder = a.time - b.time;
+        // Keep equal dates/titles deterministic when the primary sort key ties.
+        return (
+          (sortBy === "date" ? timeOrder : titleOrder) * direction ||
+          (sortBy === "date" ? titleOrder : -timeOrder) ||
+          a.originalIndex - b.originalIndex
+        );
+      });
+      results.append(...posts.map((post) => post.element));
+      sortButtons.forEach((button) => {
+        button.setAttribute(
+          "aria-pressed",
+          String(button.dataset.sortBy === sortBy),
+        );
+      });
+      const orderText = sortOrder === "asc" ? "正序" : "倒序";
+      const nextOrder = sortOrder === "asc" ? "倒序" : "正序";
+      const detail =
+        sortBy === "date"
+          ? sortOrder === "asc"
+            ? "从旧到新"
+            : "从新到旧"
+          : sortOrder === "asc"
+            ? "拼音 / A → Z"
+            : "拼音 / Z → A";
+      orderLabel.textContent = orderText;
+      orderButton.dataset.order = sortOrder;
+      orderButton.setAttribute(
+        "aria-label",
+        `当前${orderText}，切换为${nextOrder}`,
+      );
+      orderButton.title = `${detail}，点击切换为${nextOrder}`;
+      sortSummary.textContent = `按${sortBy === "date" ? "时间" : "标题"} · ${detail}`;
+      try {
+        sessionStorage.setItem(
+          "moon-journal-sort",
+          JSON.stringify({ by: sortBy, order: sortOrder }),
+        );
+      } catch {}
       filterPosts();
-    }),
-  );
+    }
+
+    function dateInputValue(date: Date) {
+      return `${String(date.getFullYear()).padStart(4, "0")}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    }
+
+    function filterPosts() {
+      const query = search.value.trim().toLocaleLowerCase();
+      // Match the calendar dates rendered on the server, without a browser time-zone conversion.
+      const from = startDate.value
+        ? Number(startDate.value.replaceAll("-", ""))
+        : -Infinity;
+      const to = endDate.value
+        ? Number(endDate.value.replaceAll("-", ""))
+        : Infinity;
+      let error = "";
+      if (startDate.validity.badInput || endDate.validity.badInput) {
+        error = "请输入有效的日期。";
+      } else if (from > to) {
+        error = "开始日期不能晚于结束日期，请调整时间范围。";
+      }
+      dateError.textContent = error;
+      dateError.hidden = !error;
+      startDate.setAttribute("aria-invalid", String(Boolean(error)));
+      endDate.setAttribute("aria-invalid", String(Boolean(error)));
+      buttons.forEach((button) => {
+        const tag = button.dataset.tag ?? "";
+        button.setAttribute(
+          "aria-pressed",
+          String(tag ? selectedTags.has(tag) : selectedTags.size === 0),
+        );
+      });
+
+      let count = 0;
+      posts.forEach(({ element: post, tags, published, searchText }) => {
+        const matchesTags =
+          selectedTags.size === 0 || tags.some((tag) => selectedTags.has(tag));
+        const matches =
+          !error &&
+          matchesTags &&
+          published >= from &&
+          published <= to &&
+          searchText.includes(query);
+        post.hidden = !matches;
+        if (matches) {
+          count++;
+          const index = post.querySelector<HTMLElement>(".entry-index");
+          if (index) index.textContent = String(count).padStart(2, "0");
+        }
+      });
+      counter.textContent = error ? "日期范围有误" : `${count} 篇手记`;
+      empty.hidden = Boolean(error) || count > 0;
+      results.hidden = count === 0;
+
+      const tagSummary = selectedTags.size
+        ? `${selectedTags.size} 个标签`
+        : "全部标签";
+      let timeSummary = "全部时间";
+      if (startDate.value || endDate.value) {
+        timeSummary = `${startDate.value || "不限"} — ${endDate.value || "不限"}`;
+      }
+      summary.textContent = `${tagSummary} · ${error ? "日期待调整" : timeSummary}`;
+      summary.setAttribute("title", summary.textContent);
+    }
+
+    search.addEventListener("input", filterPosts);
+    sortButtons.forEach((button) =>
+      button.addEventListener("click", () => {
+        sortBy = button.dataset.sortBy === "title" ? "title" : "date";
+        sortPosts();
+      }),
+    );
+    orderButton.addEventListener("click", () => {
+      sortOrder = sortOrder === "asc" ? "desc" : "asc";
+      sortPosts();
+    });
+    buttons.forEach((button) =>
+      button.addEventListener("click", () => {
+        const tag = button.dataset.tag ?? "";
+        if (!tag) selectedTags.clear();
+        else if (selectedTags.has(tag)) selectedTags.delete(tag);
+        else selectedTags.add(tag);
+        filterPosts();
+      }),
+    );
+
+    timeRange.addEventListener("change", () => {
+      if (timeRange.value === "all") {
+        startDate.value = "";
+        endDate.value = "";
+      } else if (timeRange.value !== "custom") {
+        const from = new Date();
+        const to = new Date(from);
+        if (timeRange.value === "year") {
+          from.setMonth(0, 1);
+          to.setMonth(11, 31);
+        } else {
+          from.setDate(from.getDate() - Number(timeRange.value) + 1);
+        }
+        startDate.value = dateInputValue(from);
+        endDate.value = dateInputValue(to);
+      }
+      filterPosts();
+    });
+
+    [startDate, endDate].forEach((input) =>
+      input.addEventListener("input", () => {
+        timeRange.value = startDate.value || endDate.value ? "custom" : "all";
+        filterPosts();
+      }),
+    );
+
+    reset.addEventListener("click", () => {
+      search.value = "";
+      selectedTags.clear();
+      timeRange.value = "all";
+      startDate.value = "";
+      endDate.value = "";
+      filterPosts();
+    });
+
+    sortPosts();
+  }
+  document.addEventListener("astro:page-load", setupFilters);
 </script>

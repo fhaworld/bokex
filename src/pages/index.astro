@@ -1,9 +1,10 @@
 ---
 import { getCollection } from "astro:content";
-import { Image } from "astro:assets";
-import MoonlitSky from "../assets/moonlit-sky.png";
 import SiteLayout from "../layouts/SiteLayout.astro";
-import PostCard from "../components/PostCard.astro";
+import FeaturedEntries from "../components/FeaturedEntries.astro";
+import ShortNotes from "../components/ShortNotes.astro";
+import MoonAura from "../components/MoonAura.astro";
+import MusicPlayer from "../components/MusicPlayer.astro";
 const posts = (await getCollection("blog")).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
@@ -12,18 +13,6 @@ const base = import.meta.env.BASE_URL;
 
 <SiteLayout>
   <section class="hero" aria-labelledby="hero-title">
-    <div class="hero-art" aria-hidden="true">
-      <Image
-        src={MoonlitSky}
-        alt=""
-        widths={[700, 1180, 1672]}
-        sizes="(max-width: 700px) 700px, (max-width: 1260px) 100vw, 1180px"
-        format="webp"
-        quality={88}
-        loading="eager"
-        fetchpriority="high"
-      />
-    </div>
     <div class="hero-copy">
       <p class="eyebrow">
         <span class="tiny-line"></span> A JOURNAL AFTER DARK
@@ -39,7 +28,8 @@ const base = import.meta.env.BASE_URL;
         这里收藏技术、生活，以及那些一闪而过的灵感。
       </p>
       <div class="hero-actions">
-        <a class="button primary" href={`${base}blog/`}>
+        <a class="button primary moon-button" href={`${base}blog/`}>
+          <MoonAura />
           翻开手记 <span>↗</span>
         </a>
         <a class="quiet-link" href={`${base}about/`}>
@@ -51,32 +41,14 @@ const base = import.meta.env.BASE_URL;
         <span class="caption-number">01 / ∞</span>
       </div>
     </div>
-    <div class="moon-scene" aria-hidden="true">
-      <div class="moon-cloud cloud-back"></div>
-      <div class="moon-cloud cloud-front"></div>
-      <div class="moon-shards">
-        <i></i>
-        <i></i>
-        <i></i>
-        <i></i>
-        <i></i>
-      </div>
-      <span class="scene-coordinate">
-        UNDER THE SAME MOON
-      </span>
-      <span class="scene-label">
-        静夜
-        <br />
-        <small>THE SILENT BLUE</small>
-      </span>
-    </div>
   </section>
+  <MusicPlayer />
   <section class="home-notes" aria-labelledby="notes-title">
     <div class="section-heading">
       <div>
-        <p class="eyebrow">RECENT ENTRIES</p>
+        <p class="eyebrow">PAGES IN THE MOONLIGHT</p>
         <h2 id="notes-title">
-          最近的手记<span class="heading-dot">.</span>
+          月光里的手记<span class="heading-dot">.</span>
         </h2>
       </div>
       <a class="quiet-link" href={`${base}blog/`}>
@@ -84,12 +56,9 @@ const base = import.meta.env.BASE_URL;
       </a>
     </div>
     <div class="home-grid">
-      <div class="post-list">
-        {posts.slice(0, 3).map((post, index) => (
-          <PostCard post={post} index={index} />
-        ))}
-      </div>
+      <FeaturedEntries posts={posts} />
       <aside class="journal-aside">
+        <ShortNotes />
         <section class="aside-card glass">
           <span class="aside-symbol">☾</span>
           <p class="eyebrow">A LITTLE ABOUT HERE</p>
@@ -111,15 +80,6 @@ const base = import.meta.env.BASE_URL;
             </div>
           </div>
         </section>
-        <div class="night-quote">
-          <span>“</span>
-          <p>
-            有些光，
-            <br />
-            只有在夜里才能看见。
-          </p>
-          <small>NOTES UNDER THE MOON</small>
-        </div>
       </aside>
     </div>
   </section>

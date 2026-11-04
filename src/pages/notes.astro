@@ -1,0 +1,52 @@
+---
+import { getCollection } from "astro:content";
+import SiteLayout from "../layouts/SiteLayout.astro";
+import ShortNote from "../components/ShortNote.astro";
+const notes = (await getCollection("notes")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<SiteLayout
+  title="月下短笺"
+  description="不必成篇，也值得留下。收集月光下的小小片刻。"
+>
+  <section class="page-intro">
+    <p class="eyebrow">LITTLE THINGS, LATELY</p>
+    <h1>
+      月下短笺<span class="heading-dot">.</span>
+    </h1>
+    <p>不必成篇，也值得留下。这里收集小小的片刻。</p>
+  </section>
+  <section class="notes-archive glass" aria-label="全部短笺">
+    {notes.length ? (
+      notes.map((note) => <ShortNote note={note} compact={false} />)
+    ) : (
+      <p>下一点灵感，还在路上。</p>
+    )}
+  </section>
+  <a
+    class="quiet-link notes-back"
+    href={`${import.meta.env.BASE_URL}#notes-title`}
+  >
+    ← 返回首页手记
+  </a>
+</SiteLayout>
+
+<style>
+  .notes-archive {
+    padding: 38px;
+    max-width: 850px;
+    display: grid;
+    gap: 38px;
+  }
+  .notes-back {
+    display: inline-block;
+    margin-top: 28px;
+  }
+  @media (max-width: 700px) {
+    .notes-archive {
+      padding: 26px 22px;
+    }
+  }
+</style>

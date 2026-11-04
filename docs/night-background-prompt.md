@@ -12,4 +12,4 @@
 
 ## 使用位置
 
-生成的图片已接入 `src/assets/moonlit-sky.png`，用于首页 `.hero-art` 背景。Astro 构建时会生成响应式 WebP 图片。桌面端展示横向场景，手机端裁切保留右侧月亮，云雾与微光动效仍由 CSS 叠加。
+生成的图片已接入 `src/assets/moonlit-sky.png`，由 `NightSky.astro` 用作全站固定背景。Astro 构建时会生成响应式 WebP 图片，手机端单独调整裁切位置，背景微光与雾气动效由 CSS 叠加。

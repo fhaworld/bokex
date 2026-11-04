@@ -1,5 +1,6 @@
 ---
 import SiteLayout from "../layouts/SiteLayout.astro";
+import MoonAura from "../components/MoonAura.astro";
 ---
 
 <SiteLayout title="关于这里">
@@ -31,7 +32,8 @@ import SiteLayout from "../layouts/SiteLayout.astro";
     <p>
       文章会持续更新。如果你也恰好路过，愿这里的某一段文字，能与你产生一点共鸣。
     </p>
-    <a class="button primary" href={`${import.meta.env.BASE_URL}blog/`}>
+    <a class="button primary moon-button" href={`${import.meta.env.BASE_URL}blog/`}>
+      <MoonAura />
       从一篇手记开始 ↗
     </a>
   </section>

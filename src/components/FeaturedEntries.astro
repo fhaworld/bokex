@@ -1,0 +1,176 @@
+---
+import type { CollectionEntry } from "astro:content";
+import PostCard from "./PostCard.astro";
+import MoonAura from "./MoonAura.astro";
+
+interface Props {
+  posts: CollectionEntry<"blog">[];
+}
+const { posts } = Astro.props;
+const featured = posts.filter((post) => post.data.featured).slice(0, 3);
+const views = [
+  { id: "featured", label: "精选", posts: featured },
+  { id: "recent", label: "最近", posts: posts.slice(0, 3) },
+];
+const selected = featured.length ? "featured" : "recent";
+---
+
+<div class="entries-feed" data-entry-tabs>
+  <div class="entries-toolbar">
+    <div class="entry-tabs" role="tablist" aria-label="首页手记">
+      {views.map((view) => (
+        <button
+          class="entry-tab moon-button"
+          type="button"
+          role="tab"
+          id={`entries-tab-${view.id}`}
+          aria-controls={`entries-panel-${view.id}`}
+          aria-selected={selected === view.id ? "true" : "false"}
+          tabindex={selected === view.id ? 0 : -1}
+        >
+          <MoonAura />
+          {view.label}
+          <span class="entry-count">
+            {String(view.posts.length).padStart(2, "0")}
+          </span>
+        </button>
+      ))}
+    </div>
+    <span class="entries-caption">留在这里的片刻</span>
+  </div>
+  {views.map((view) => (
+    <div
+      class="post-list"
+      id={`entries-panel-${view.id}`}
+      role="tabpanel"
+      aria-labelledby={`entries-tab-${view.id}`}
+      tabindex="0"
+      hidden={selected !== view.id}
+    >
+      {view.posts.length ? (
+        view.posts.map((post, index) => <PostCard post={post} index={index} />)
+      ) : (
+        <div class="entries-empty glass">
+          <span aria-hidden="true">☾</span>
+          <p>
+            {view.id === "featured"
+              ? "精选手记正在慢慢收集。"
+              : "第一篇手记，还在路上。"}
+          </p>
+          <p>
+            {view.id === "featured"
+              ? "先去「最近」翻翻新写的文字吧。"
+              : "下一个值得记录的片刻，就从这里开始。"}
+          </p>
+        </div>
+      )}
+    </div>
+  ))}
+</div>
+
+<script>
+  function setupEntryTabs() {
+    document
+      .querySelectorAll<HTMLElement>("[data-entry-tabs]")
+      .forEach((root) => {
+        if (root.dataset.ready) return;
+        root.dataset.ready = "true";
+        const tabs = [
+          ...root.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+        ];
+        const panels = [
+          ...root.querySelectorAll<HTMLElement>('[role="tabpanel"]'),
+        ];
+        function selectTab(selected: HTMLButtonElement) {
+          tabs.forEach((tab) => {
+            const active = tab === selected;
+            tab.setAttribute("aria-selected", String(active));
+            tab.tabIndex = active ? 0 : -1;
+          });
+          panels.forEach((panel) => {
+            panel.hidden = panel.id !== selected.getAttribute("aria-controls");
+          });
+        }
+        tabs.forEach((tab, index) => {
+          tab.addEventListener("click", () => selectTab(tab));
+          tab.addEventListener("keydown", (event) => {
+            let next: number;
+            if (event.key === "ArrowRight") next = (index + 1) % tabs.length;
+            else if (event.key === "ArrowLeft")
+              next = (index - 1 + tabs.length) % tabs.length;
+            else if (event.key === "Home") next = 0;
+            else if (event.key === "End") next = tabs.length - 1;
+            else return;
+            event.preventDefault();
+            tabs[next].focus();
+            selectTab(tabs[next]);
+          });
+        });
+      });
+  }
+  document.addEventListener("astro:page-load", setupEntryTabs);
+</script>
+
+<style>
+  .entries-feed {
+    min-width: 0;
+  }
+  .entries-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+  .entry-tabs {
+    display: flex;
+    gap: 10px;
+  }
+  .entry-tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 9px 18px;
+    border: 1px solid #a5d9f02b;
+    border-radius: 10px;
+    background: #0c1b3066;
+    color: #a4b9d0;
+    font-size: 13px;
+  }
+  .entry-tab[aria-selected="true"] {
+    color: #e1f5ff;
+    background: #a0d9fa16;
+    border-color: #c1eaff66;
+  }
+  .entry-count {
+    color: #a1c7dc;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+  .entries-caption {
+    color: #8fa5bf;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+  }
+  .entries-empty {
+    padding: 44px 24px;
+    text-align: center;
+    color: #afc4dc;
+  }
+  .entries-empty > span {
+    display: block;
+    color: #c1e7f9;
+    font-size: 36px;
+    margin-bottom: 12px;
+  }
+  .entries-empty p {
+    font-size: 13px;
+    margin: 6px 0;
+  }
+  @media (max-width: 700px) {
+    .entries-caption {
+      display: none;
+    }
+  }
+</style>
