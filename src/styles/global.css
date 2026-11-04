@@ -247,6 +247,28 @@ main {
   min-height: 650px;
   align-items: center;
   position: relative;
+  isolation: isolate;
+}
+.hero-art {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(transparent, #000 8%, #000 78%, transparent);
+  -webkit-mask-image: linear-gradient(transparent, #000 8%, #000 78%, transparent);
+}
+.hero-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.hero-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #080f2499, transparent 65%);
 }
 .hero-copy {
   position: relative;
@@ -353,64 +375,6 @@ main {
   height: 560px;
   isolation: isolate;
 }
-.moon-glow {
-  position: absolute;
-  width: 440px;
-  height: 440px;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: radial-gradient(
-    circle,
-    #94dcff30,
-    #4f9aec17 36%,
-    transparent 68%
-  );
-}
-.full-moon {
-  position: absolute;
-  width: 222px;
-  height: 222px;
-  border-radius: 50%;
-  top: 105px;
-  left: 50%;
-  transform: translateX(-50%);
-  background:
-    radial-gradient(ellipse at 34% 20%, #a8b5cd33 0 5%, transparent 6%),
-    radial-gradient(ellipse at 70% 32%, #5b82a52e 0 12%, transparent 14%),
-    radial-gradient(ellipse at 31% 66%, #758ea329 0 17%, transparent 19%),
-    radial-gradient(ellipse at 56% 77%, #afbed150 0 8%, transparent 12%),
-    radial-gradient(circle at 40% 40%, #f5fbff, #dbeafa 55%, #aac9e3 90%);
-  box-shadow:
-    inset -12px -8px 25px #557da147,
-    0 0 22px #adf3ff7a,
-    0 0 70px #5bafff4a;
-}
-.orbit {
-  position: absolute;
-  border: 1px solid #8dbce612;
-  border-radius: 50%;
-  left: 50%;
-  top: 25px;
-  transform: translateX(-50%);
-  width: 385px;
-  height: 385px;
-}
-.orbit::before {
-  content: "+";
-  position: absolute;
-  color: #96c9e8;
-  font-size: 16px;
-  top: 22%;
-  left: 8%;
-}
-.orbit-two {
-  width: 490px;
-  height: 490px;
-  top: -27px;
-  border-style: dashed;
-  opacity: 0.5;
-}
 .moon-cloud {
   position: absolute;
   width: 110%;
@@ -426,13 +390,13 @@ main {
 }
 .cloud-back {
   top: 210px;
-  opacity: 0.8;
+  opacity: 0.18;
 }
 .cloud-front {
   top: 290px;
   left: -15%;
   transform: rotate(-10deg);
-  opacity: 0.6;
+  opacity: 0.12;
   animation-delay: -10s;
 }
 .scene-coordinate {
@@ -1142,26 +1106,6 @@ html[data-motion="off"] .post-card {
   .moon-scene {
     height: 500px;
   }
-  .orbit-two {
-    width: 380px;
-    height: 380px;
-    top: 30px;
-  }
-  .orbit-one {
-    width: 310px;
-    height: 310px;
-    top: 65px;
-  }
-  .full-moon {
-    width: 190px;
-    height: 190px;
-    top: 120px;
-  }
-  .moon-glow {
-    width: 350px;
-    height: 350px;
-    top: 40px;
-  }
   .home-grid {
     grid-template-columns: minmax(0, 1fr) 260px;
     gap: 20px;
@@ -1252,23 +1196,18 @@ html[data-motion="off"] .post-card {
     margin-top: 10px;
     overflow: hidden;
   }
-  .full-moon {
-    width: 170px;
-    height: 170px;
-    top: 55px;
+  .hero-art {
+    top: auto;
+    bottom: 0;
+    height: 390px;
+    mask-image: linear-gradient(transparent, #000 12%, #000 80%, transparent);
+    -webkit-mask-image: linear-gradient(transparent, #000 12%, #000 80%, transparent);
   }
-  .moon-glow {
-    top: -30px;
+  .hero-art img {
+    object-position: 85% center;
   }
-  .orbit-one {
-    top: 2px;
-    width: 280px;
-    height: 280px;
-  }
-  .orbit-two {
-    top: -32px;
-    width: 350px;
-    height: 350px;
+  .hero-art::after {
+    background: none;
   }
   .cloud-back {
     top: 125px;
