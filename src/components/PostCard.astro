@@ -1,0 +1,35 @@
+---
+import type { CollectionEntry } from "astro:content";
+import FormattedDate from "./FormattedDate.astro";
+interface Props {
+  post: CollectionEntry<"blog">;
+  index?: number;
+}
+const { post, index = 0 } = Astro.props;
+const minutes = Math.max(1, Math.ceil((post.body?.length ?? 0) / 650));
+---
+
+<article class="post-card glass" style={`--card-index:${index}`}>
+  <div class="post-meta">
+    <span>{post.data.tags[0] ?? "未分类"}</span>
+    <span>
+      <FormattedDate date={post.data.pubDate} /> · {minutes} 分钟
+    </span>
+  </div>
+  <h3>
+    <a href={`${import.meta.env.BASE_URL}blog/${post.id}/`}>
+      {post.data.title}
+    </a>
+  </h3>
+  <p>{post.data.description}</p>
+  <div class="card-bottom">
+    <span>
+      {post.data.tags.length
+        ? post.data.tags.map((tag) => `# ${tag}`).join("　")
+        : "MOONLIT NOTES"}
+    </span>
+    <span class="card-arrow" aria-hidden="true">
+      ↗
+    </span>
+  </div>
+</article>

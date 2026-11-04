@@ -1,0 +1,50 @@
+---
+import { getCollection } from "astro:content";
+import SiteLayout from "../layouts/SiteLayout.astro";
+import FormattedDate from "../components/FormattedDate.astro";
+const posts = (await getCollection("blog")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const years = [
+  ...new Set(posts.map((post) => post.data.pubDate.getFullYear())),
+];
+---
+
+<SiteLayout title="时光归档">
+  <section class="page-intro">
+    <p class="eyebrow">TRACES OF TIME</p>
+    <h1>
+      月光走过的地方<span class="heading-dot">.</span>
+    </h1>
+    <p>让零散的片刻，在时间里慢慢连成一条线。</p>
+  </section>
+  <div class="archive-panel glass">
+    {years.map((year) => (
+      <section class="archive-year">
+        <h2>
+          {year}
+          <span>
+            {
+              posts.filter((post) => post.data.pubDate.getFullYear() === year)
+                .length
+            }{" "}
+            篇
+          </span>
+        </h2>
+        <ul>
+          {posts
+            .filter((post) => post.data.pubDate.getFullYear() === year)
+            .map((post) => (
+              <li>
+                <FormattedDate date={post.data.pubDate} />
+                <a href={`${import.meta.env.BASE_URL}blog/${post.id}/`}>
+                  {post.data.title}
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+            ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+</SiteLayout>

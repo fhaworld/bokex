@@ -1,84 +1,122 @@
 ---
-import { Image } from 'astro:assets';
-import type { CollectionEntry } from 'astro:content';
-import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
-import FormattedDate from '../components/FormattedDate.astro';
-import Header from '../components/Header.astro';
-
-type Props = CollectionEntry<'blog'>['data'];
-
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+import { Image } from "astro:assets";
+import type { MarkdownHeading } from "astro";
+import type { CollectionEntry } from "astro:content";
+import SiteLayout from "./SiteLayout.astro";
+import FormattedDate from "../components/FormattedDate.astro";
+type Props = CollectionEntry<"blog">["data"] & {
+  headings?: MarkdownHeading[];
+  minutes?: number;
+};
+const {
+  title,
+  description,
+  pubDate,
+  updatedDate,
+  heroImage,
+  tags = [],
+  headings = [],
+  minutes = 1,
+} = Astro.props;
+const toc = headings.filter(
+  (heading) => heading.depth === 2 || heading.depth === 3,
+);
 ---
 
-<html lang="en">
-	<head>
-		<BaseHead title={title} description={description} />
-		<style>
-			main {
-				width: calc(100% - 2em);
-				max-width: 100%;
-				margin: 0;
-			}
-			.hero-image {
-				width: 100%;
-			}
-			.hero-image img {
-				display: block;
-				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--box-shadow);
-			}
-			.prose {
-				width: 720px;
-				max-width: calc(100% - 2em);
-				margin: auto;
-				padding: 1em;
-				color: rgb(var(--gray-dark));
-			}
-			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
-				text-align: center;
-				line-height: 1;
-			}
-			.title h1 {
-				margin: 0 0 0.5em 0;
-			}
-			.date {
-				margin-bottom: 0.5em;
-				color: rgb(var(--gray));
-			}
-			.last-updated-on {
-				font-style: italic;
-			}
-		</style>
-	</head>
-
-	<body>
-		<Header />
-		<main>
-			<article>
-				<div class="hero-image">
-					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
-				</div>
-				<div class="prose">
-					<div class="title">
-						<div class="date">
-							<FormattedDate date={pubDate} />
-							{updatedDate && (
-								<div class="last-updated-on">
-									Last updated on <FormattedDate date={updatedDate} />
-								</div>
-							)}
-						</div>
-						<h1>{title}</h1>
-						<hr />
-					</div>
-					<slot />
-				</div>
-			</article>
-		</main>
-		<Footer />
-	</body>
-</html>
+<SiteLayout title={title} description={description}>
+  <div class="reading-progress" aria-hidden="true"></div>
+  <div class="article-top">
+    <a class="quiet-link" href={`${import.meta.env.BASE_URL}blog/`}>
+      ← 返回手记
+    </a>
+    <span class="eyebrow">A MOMENT, WRITTEN DOWN</span>
+  </div>
+  <header class="article-header">
+    <div class="post-meta">
+      <FormattedDate date={pubDate} />
+      <span>约 {minutes} 分钟阅读</span>
+    </div>
+    <h1>{title}</h1>
+    <p>{description}</p>
+    <div class="article-tags">
+      {tags.map((tag) => (
+        <span># {tag}</span>
+      ))}
+    </div>
+    {updatedDate && (
+      <p class="updated-date">
+        更新于 <FormattedDate date={updatedDate} />
+      </p>
+    )}
+  </header>
+  <div class:list={["reading-layout", { "with-toc": toc.length > 0 }]}>
+    <article class="article-body glass prose">
+      {heroImage && (
+        <Image
+          class="article-cover"
+          src={heroImage}
+          width={1120}
+          height={560}
+          alt=""
+        />
+      )}
+      <slot />
+      <div class="article-end">
+        <span>✧</span>
+        <p>写于月下，读于此刻。</p>
+        <a href={`${import.meta.env.BASE_URL}blog/`}>继续翻阅 →</a>
+      </div>
+    </article>
+    {toc.length > 0 && (
+      <aside class="article-toc glass">
+        <p class="eyebrow">ON THIS PAGE</p>
+        <h2>本篇目录</h2>
+        <nav aria-label="文章目录">
+          {toc.map((heading) => (
+            <a
+              class:list={{ "toc-sub": heading.depth === 3 }}
+              href={`#${heading.slug}`}
+            >
+              {heading.text}
+            </a>
+          ))}
+        </nav>
+      </aside>
+    )}
+  </div>
+</SiteLayout>
+<script>
+  document.querySelectorAll<HTMLElement>(".prose pre").forEach((pre) => {
+    const code = pre.querySelector("code");
+    if (!code || !navigator.clipboard) return;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "copy-code";
+    button.textContent = "复制";
+    button.setAttribute("aria-label", "复制代码");
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(code.textContent ?? "");
+        button.textContent = "已复制";
+        button.setAttribute("aria-label", "代码已复制");
+      } catch {
+        button.textContent = "复制失败";
+        button.setAttribute("aria-label", "代码复制失败");
+      }
+      setTimeout(() => {
+        button.textContent = "复制";
+        button.setAttribute("aria-label", "复制代码");
+      }, 1800);
+    });
+    pre.append(button);
+  });
+  const progress = document.querySelector<HTMLElement>(".reading-progress");
+  function updateProgress() {
+    const distance = document.documentElement.scrollHeight - innerHeight;
+    if (progress)
+      progress.style.transform = `scaleX(${distance > 0 ? Math.min(1, scrollY / distance) : 1})`;
+  }
+  addEventListener("scroll", updateProgress, { passive: true });
+  addEventListener("resize", updateProgress);
+  updateProgress();
+</script>

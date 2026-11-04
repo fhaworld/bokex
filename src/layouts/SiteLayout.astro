@@ -1,0 +1,32 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import NightSky from "../components/NightSky.astro";
+import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title = SITE_TITLE, description = SITE_DESCRIPTION } = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <BaseHead
+      title={title === SITE_TITLE ? title : `${title} · ${SITE_TITLE}`}
+      description={description}
+    />
+  </head>
+  <body id="top">
+    <NightSky />
+    <div class="site-wrap">
+      <Header />
+      <main id="main">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+  </body>
+</html>
